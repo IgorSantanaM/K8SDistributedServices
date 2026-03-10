@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PlatformService.Data;
 using PlatformService.Dtos;
+using PlatformService.SyncDataServices.Http;
 
 namespace PlatformService.Endpoints.Internal
 {
@@ -33,7 +34,8 @@ namespace PlatformService.Endpoints.Internal
 
         #region Handlers
 
-        private static async Task<IResult> GetPlatformById([FromRoute] int id, IPlatformRepository repository, IMapper mapper)
+        private static async Task<IResult> GetPlatformById([FromRoute] int id, IPlatformRepository repository, 
+            IMapper mapper)
         {
             var platform = await repository.GetPlatformByIdAsync(id);
             if (platform == null)
@@ -43,18 +45,31 @@ namespace PlatformService.Endpoints.Internal
             var platformDto = mapper.Map<PlatformReadDto>(platform);
             return Results.Ok(platformDto);
         }
-        private static async Task<IResult> GetPlatforms(IPlatformRepository repository, IMapper mapper)
+        private static async Task<IResult> GetPlatforms(IPlatformRepository repository, 
+            IMapper mapper)
         {
             var platforms = await repository.GetAllPlatformsAsync();
             var platformDtos = mapper.Map<IEnumerable<PlatformReadDto>>(platforms);
             return Results.Ok(platformDtos);
         }
-        private static async Task<IResult> CreatePlatform([FromBody] PlatformCreateDto platformCreateDto, IPlatformRepository repository, IMapper mapper)
+        private static async Task<IResult> CreatePlatform([FromBody] PlatformCreateDto platformCreateDto,
+            IPlatformRepository repository, 
+            IMapper mapper,
+            ICommandDataClient commandDataClient)
         {
            var platformModel = mapper.Map<Models.Platform>(platformCreateDto);
             await repository.CreatePlatformAsync(platformModel);
             if(await repository.SaveChanges())
                 return Results.Created($"/api/platforms/{platformModel.Id}", platformModel);
+            var platformReadDto = mapper.Map<PlatformReadDto>(platformModel); try
+            {
+                await commandDataClient.SendPlatformToCommand(platformReadDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
+            }
+
             return Results.BadRequest();
         }
 
