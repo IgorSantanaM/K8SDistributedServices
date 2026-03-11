@@ -19,6 +19,7 @@ namespace CommandService.Data
                 .HasOne(c => c.Platform)
                 .WithMany(p => p.Commands)
                 .HasForeignKey(c => c.PlatformId);
+
             base.OnModelCreating(modelBuilder);
         }
     }
