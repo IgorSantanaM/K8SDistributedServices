@@ -6,9 +6,9 @@ namespace CommandService.Data
     {
         // Platforms
         Task<IEnumerable<Platform>> GetPlatformsAsync(CancellationToken cancellationToken);
-        Task CreatePlatformAsync(Platform platform, CancellationToken cancellationToken);   
+        Task CreatePlatformAsync(Platform platform, CancellationToken cancellationToken);
         Task<bool> PlatformExistsAsync(int platformId, CancellationToken cancellationToken);
-
+        Task<bool> ExternalPlatformExists(int externalPlatformId, CancellationToken cancellationToken);
         // Commands
         Task<IEnumerable<Command>> GetCommandsForPlatformAsync(int platformId, CancellationToken cancellationToken);
         Task<Command?> GetCommandAsync(int platformId, int commandId, CancellationToken cancellationToken);

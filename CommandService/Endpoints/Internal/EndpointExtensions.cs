@@ -22,3 +22,4 @@ namespace CommandService.Endpoints.Internal
                 (x => !x.IsAbstract && !x.IsInterface && typeof(IEndpoint).IsAssignableFrom(x));
         }
     }
+}

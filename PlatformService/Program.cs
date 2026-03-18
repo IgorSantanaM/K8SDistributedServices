@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.Endpoints.Internal;
 using PlatformService.SyncDataServices.Http;
@@ -30,6 +31,7 @@ services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>(opt =>
 {
     opt.BaseAddress = new Uri(builder.Configuration["CommandService"]!);
 });
+services.AddSingleton<IMessageBusClient, MessageBusClient>();
 
 services.AddControllers();
 

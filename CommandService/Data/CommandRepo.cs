@@ -1,5 +1,6 @@
 ﻿using CommandService.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 namespace CommandService.Data
 {
@@ -20,6 +21,11 @@ namespace CommandService.Data
             if(platform == null)
                 throw new ArgumentNullException(nameof(platform));
             await dbContext.AddAsync(platform, cancellationToken);
+        }
+
+        public Task<bool> ExternalPlatformExists(int externalPlatformId, CancellationToken cancellationToken)
+        {
+            return dbContext.Platforms.AsNoTracking().AnyAsync(p => p.ExternalId == externalPlatformId, cancellationToken);
         }
 
         public Task<Command?> GetCommandAsync(int platformId, int commandId, CancellationToken cancellationToken)
