@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.Dtos;
 using PlatformService.SyncDataServices.Http;
@@ -55,19 +56,22 @@ namespace PlatformService.Endpoints.Internal
         private static async Task<IResult> CreatePlatform([FromBody] PlatformCreateDto platformCreateDto,
             IPlatformRepository repository, 
             IMapper mapper,
-            ICommandDataClient commandDataClient)
+            IMessageBusClient messageBusClient)
         {
            var platformModel = mapper.Map<Models.Platform>(platformCreateDto);
             await repository.CreatePlatformAsync(platformModel);
             if(await repository.SaveChanges())
                 return Results.Created($"/api/platforms/{platformModel.Id}", platformModel);
-            var platformReadDto = mapper.Map<PlatformReadDto>(platformModel); try
+            var platformReadDto = mapper.Map<PlatformReadDto>(platformModel);
+            var platformPublishedDto = mapper.Map<PlatformPublishedDto>(platformReadDto);   
+            platformPublishedDto.Event = "Platform_Published";
+            try
             {
-                await commandDataClient.SendPlatformToCommand(platformReadDto);
+                await messageBusClient.PublishNewPlatformAsync(platformPublishedDto);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
             }
 
             return Results.BadRequest();

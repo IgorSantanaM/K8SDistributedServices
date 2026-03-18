@@ -1,4 +1,6 @@
-﻿namespace PlatformService.Data
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace PlatformService.Data
 {
     public static class PrepDb
     {
