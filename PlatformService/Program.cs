@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.Endpoints.Internal;
+using PlatformService.SyncDataServices.Grpc;
 using PlatformService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,7 @@ services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>(opt =>
     opt.BaseAddress = new Uri(builder.Configuration["CommandService"]!);
 });
 services.AddSingleton<IMessageBusClient, MessageBusClient>();
-
+services.AddGrpc();
 services.AddControllers();
 
 var app = builder.Build();
@@ -47,4 +48,9 @@ if(app.Environment.IsProduction())
 app.PrepPopulation();
 app.MapOpenApi();
 app.MapControllers();
+app.MapGrpcService<GrpcPlatformService>();
+app.MapGet("/protos/platforms.proto", async context =>
+{
+    await context.Response.WriteAsync(File.ReadAllText("protos/platforms.proto"));
+});
 app.UseHttpsRedirection();
