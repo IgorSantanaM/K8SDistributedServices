@@ -11,7 +11,7 @@ namespace PlatformService.Endpoints.Internal
         {
             IEnumerable<TypeInfo> endpointType = GetEndpointTypes(type);
 
-            foreach (TypeInfo typeInfo in endpointType) 
+            foreach (TypeInfo typeInfo in endpointType)
                 typeInfo.GetMethod(nameof(IEndpoint.DefineEndpoints))?
                     .Invoke(null, [app]);
         }

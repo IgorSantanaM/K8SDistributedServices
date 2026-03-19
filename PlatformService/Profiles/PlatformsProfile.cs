@@ -10,6 +10,8 @@ namespace PlatformService.Profiles
         {
             CreateMap<Platform, PlatformReadDto>().ReverseMap();
             CreateMap<PlatformReadDto, PlatformPublishedDto>();        
+            CreateMap<Platform, GrpcPlatformModel>()
+                .ForMember(dest => dest.PlatformId, opt => opt.MapFrom(src => src.Id)).ReverseMap();
         }
     }
 }
